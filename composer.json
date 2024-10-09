@@ -1,0 +1,15 @@
+{
+    "name": "max/php-utilities",
+    "autoload": {
+        "psr-4": {
+            "Max\\PhpUtilities\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Max Brennemann",
+            "email": "maxgoogelt@gmail.com"
+        }
+    ],
+    "require": {}
+}

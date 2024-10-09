@@ -120,7 +120,7 @@ class DBAccess
 	 * returns the number of affected rows by the last INSERT, UPDATE, DELETE query
 	 * @return int
 	 */
-	public static function getAffectedRows(): int
+	public static function getAffectedRows()
 	{
 		return self::$statement->rowCount();
 	}
@@ -142,7 +142,7 @@ class DBAccess
 	*/
 
 	// by https://github.com/ttodua/useful-php-scripts //
-	public static function EXPORT_DATABASE($host, $user, $pass, $name,       $tables = false, $backup_name = false)
+	public static function EXPORT_DATABASE($host, $user, $pass, $name, $tables = false, $backup_name = false)
 	{
 		set_time_limit(3000);
 		$mysqli = new \mysqli($host, $user, $pass, $name);

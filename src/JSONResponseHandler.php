@@ -5,7 +5,7 @@ namespace MaxBrennemann\PhpUtilities;
 class JSONResponseHandler
 {
 
-    public static function throwError(int $httpStatusCode, String|array $message)
+    public static function throwError(int $httpStatusCode, string|array $message)
     {
         if (!headers_sent()) {
             http_response_code($httpStatusCode);

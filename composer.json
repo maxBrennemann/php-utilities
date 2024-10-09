@@ -2,7 +2,7 @@
     "name": "max/php-utilities",
     "autoload": {
         "psr-4": {
-            "Max\\PhpUtilities\\": "src/"
+            "MaxBrennemann\\PhpUtilities\\": "src/"
         }
     },
     "authors": [

@@ -7,26 +7,52 @@ class JSONResponseHandler
 
     public static function throwError(int $httpStatusCode, String|array $message)
     {
-        http_response_code($httpStatusCode);
+        if (!headers_sent()) {
+            http_response_code($httpStatusCode);
+        }
+
         echo json_encode(array("message" => $message));
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+        
         die();
     }
 
     public static function sendResponse($data)
     {
-        http_response_code(200);
+        if (!headers_sent()) {
+            http_response_code(200);
+        }
+
         echo json_encode($data);
     }
 
     public static function returnOK()
     {
-        http_response_code(200);
+        if (!headers_sent()) {
+            http_response_code(200);
+        }
+
         echo json_encode(array("message" => "OK"));
     }
 
-    public static function returnNotFound()
+    public static function returnNotFound(string $additionalMessage = "")
     {
-        http_response_code(404);
-        echo json_encode(array("message" => "Not found"));
+        if (!headers_sent()) {
+            http_response_code(404);
+        }
+
+        echo json_encode([
+            "message" => "Not found",
+            "details" => $additionalMessage
+        ]);
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+
+        die();
     }
 }

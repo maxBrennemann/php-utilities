@@ -5,10 +5,6 @@ namespace MaxBrennemann\PhpUtilities;
 class Routes
 {
 
-    function __construct()
-    {
-    }
-
     protected static $getRoutes = [];
     protected static $postRoutes = [];
     protected static $putRoutes = [];
@@ -74,7 +70,7 @@ class Routes
     {
         foreach ($routes as $route => $callback) {
             if (static::matchUrlPattern($url, $route)) {
-                $callback();
+                self::callCallback($callback);
                 return true;
             }
         }
@@ -135,6 +131,13 @@ class Routes
 
     private static function callCallback($callback)
     {
-        $callback();
+        if (!is_callable($callback)) {
+            if ($_ENV["DEV_MODE"] === "true") {
+                JSONResponseHandler::throwError(500, "Internal server error, callback function not found");
+            }
+
+            JSONResponseHandler::throwError(500, "Internal server error");
+        }
+        call_user_func($callback);
     }
 }

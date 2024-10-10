@@ -32,9 +32,20 @@ class DBAccess
 	public static function selectQuery($query, $params = NULL)
 	{
 		self::createConnection();
+
+		if ($query == "") {
+			JSONResponseHandler::throwError(500, "Error");
+		}
+
 		self::$statement = self::$connection->prepare($query);
-		self::$statement->execute($params);
-		$result = self::$statement->fetchAll(\PDO::FETCH_ASSOC);
+		self::bindParams($params);
+
+		try {
+			self::$statement->execute();
+			$result = self::$statement->fetchAll(\PDO::FETCH_ASSOC);
+		} catch (\Exception $e) {
+			JSONResponseHandler::throwError(500, "Error executing select query: " . $e->getMessage());
+		}
 
 		return $result;
 	}
@@ -128,6 +139,30 @@ class DBAccess
 	public static function getLastInsertId()
 	{
 		return self::$connection->lastInsertId();
+	}
+
+	private static function bindParams(&$params)
+	{
+		if ($params != NULL) {
+			foreach ($params as $key => &$val) {
+				$dataType = getType($val);
+				switch ($dataType) {
+					case "integer":
+						self::$statement->bindParam($key, $val, \PDO::PARAM_INT);
+						break;
+					case "string":
+						self::$statement->bindParam($key, $val, \PDO::PARAM_STR);
+						break;
+					case "array":
+						$val = json_encode($val);
+						self::$statement->bindParam($key, $val, \PDO::PARAM_STR);
+						break;
+					case "NULL":
+						self::$statement->bindParam($key, $val, \PDO::PARAM_NULL);
+						break;
+				}
+			}
+		}
 	}
 
 	/* 

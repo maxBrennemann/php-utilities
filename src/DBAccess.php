@@ -8,8 +8,6 @@ class DBAccess
 	protected static $connection;
 	protected static $statement;
 
-	function __construct() {}
-
 	private static function createConnection()
 	{
 		if (self::$connection != null) {
@@ -25,11 +23,11 @@ class DBAccess
 			self::$connection = new \PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
 			self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		} catch (\PDOException $e) {
-			JSONResponseHandler::throwError(500, $e->getMessage());
+			JSONResponseHandler::throwError(500, "Error connecting to database:<br>" . $e);
 		}
 	}
 
-	public static function selectQuery($query, $params = NULL)
+	public static function selectQuery(string $query, $params = NULL)
 	{
 		self::createConnection();
 
@@ -62,7 +60,7 @@ class DBAccess
 
 	public static function selectColumnNames($table)
 	{
-		$query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{$table}' AND TABLE_SCHEMA = '" . $_ENV["DB_DATABASE"] . "'";
+		$query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{$table}' AND TABLE_SCHEMA = '" . $_ENV["MYSQL_DATABASE"] . "'";
 		if ($query == null)
 			return null;
 		return self::selectQuery($query);
@@ -71,8 +69,17 @@ class DBAccess
 	public static function updateQuery($query, $params = NULL)
 	{
 		self::createConnection();
+
 		self::$statement = self::$connection->prepare($query);
-		return self::$statement->execute($params);
+		self::bindParams($params);
+
+		try {
+			$response = self::$statement->execute();
+		} catch (\Exception $e) {
+			JSONResponseHandler::throwError(500, "Error executing update query: " . $e->getMessage());
+		}
+
+		return $response;
 	}
 
 	/* exec for queries that don't return a result set */
@@ -86,16 +93,32 @@ class DBAccess
 	public static function deleteQuery($query, $params = NULL)
 	{
 		self::createConnection();
+
 		self::$statement = self::$connection->prepare($query);
-		self::$statement->execute($params);
+		self::bindParams($params);
+
+		try {
+			self::$statement->execute();
+		} catch (\Exception $e) {
+			JSONResponseHandler::throwError(500, "Error executing delete query: " . $e->getMessage());
+		}
 	}
 
 	public static function insertQuery($query, $params = NULL)
 	{
 		self::createConnection();
+
 		self::$statement = self::$connection->prepare($query);
-		self::$statement->execute($params);
-		return self::$connection->lastInsertId();
+		self::bindParams($params);
+
+		try {
+			self::$statement->execute();
+			$lastInsertId = self::$connection->lastInsertId();
+		} catch (\Exception $e) {
+			JSONResponseHandler::throwError(500, "Error executing insert query: " . $e->getMessage());
+		}
+
+		return $lastInsertId;
 	}
 
 	/**
@@ -107,8 +130,12 @@ class DBAccess
 	 * 
 	 * @return int
 	 */
-	public static function insertMultiple($queryPart, $data)
+	public static function insertMultiple(string $queryPart, array $data)
 	{
+		if ($data == null || !is_array($data) || count($data) == 0) {
+			return;
+		}
+
 		$values = str_repeat('?,', count($data[0]) - 1) . '?';
 		$sql = $queryPart .
 			str_repeat("($values),", count($data) - 1) . "($values)";
@@ -116,28 +143,6 @@ class DBAccess
 		self::createConnection();
 		self::$statement = self::$connection->prepare($sql);
 		self::$statement->execute(array_merge(...$data));
-		return self::$connection->lastInsertId();
-	}
-
-	public static function executeQuery($query)
-	{
-		self::createConnection();
-
-		self::$statement = self::$connection->prepare($query);
-		self::$statement->execute();
-	}
-
-	/**
-	 * returns the number of affected rows by the last INSERT, UPDATE, DELETE query
-	 * @return int
-	 */
-	public static function getAffectedRows()
-	{
-		return self::$statement->rowCount();
-	}
-
-	public static function getLastInsertId()
-	{
 		return self::$connection->lastInsertId();
 	}
 
@@ -165,6 +170,21 @@ class DBAccess
 		}
 	}
 
+	public static function executeQuery($query)
+	{
+		self::createConnection();
+
+		self::$statement = self::$connection->prepare($query);
+		self::$statement->execute();
+
+		self::$statement->execute();
+	}
+
+	public static function getLastInsertId()
+	{
+		return self::$connection->lastInsertId();
+	}
+
 	/* 
 	##### EXAMPLE #####
 	EXPORT_DATABASE("localhost","user","pass","db_name" ); 
@@ -177,7 +197,7 @@ class DBAccess
 	*/
 
 	// by https://github.com/ttodua/useful-php-scripts //
-	public static function EXPORT_DATABASE($host, $user, $pass, $name, $tables = false, $backup_name = false)
+	public static function EXPORT_DATABASE($host, $user, $pass, $name,       $tables = false, $backup_name = false)
 	{
 		set_time_limit(3000);
 		$mysqli = new \mysqli($host, $user, $pass, $name);

@@ -185,6 +185,15 @@ class DBAccess
 		return self::$connection->lastInsertId();
 	}
 
+	/**
+	 * returns the number of affected rows by the last INSERT, UPDATE, DELETE query
+	 * @return int
+	 */
+	public static function getAffectedRows()
+	{
+		return self::$statement->rowCount();
+	}
+
 	/* 
 	##### EXAMPLE #####
 	EXPORT_DATABASE("localhost","user","pass","db_name" ); 

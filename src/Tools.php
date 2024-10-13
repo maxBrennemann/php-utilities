@@ -123,8 +123,16 @@ class Tools
         return $id;
     }
 
-    static function outputLog(string $message, string $tag = "", string $type = "regular")
+    static function outputLog(string $message, string $tag = null, string $type = null)
     {
+        if ($tag == null) {
+            $tag = "";
+        }
+
+        if ($type == null) {
+            $type = "regular";
+        }
+
         if (!$_ENV["DEV_MODE"] || $_ENV["DEV_MODE"] == false) {
             return;
         }

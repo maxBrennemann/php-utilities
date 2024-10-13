@@ -200,8 +200,12 @@ class Tools
         JSONResponseHandler::sendResponse($data);
     }
 
-    public static function joinDataJson($results, $column = "data")
+    public static function joinDataJson($results, $column = null)
     {
+        if ($column == null) {
+            $column = "data";
+        }
+        
         foreach ($results as &$result) {
             $data = json_decode($result[$column], true);
 
@@ -218,8 +222,12 @@ class Tools
         return $results;
     }
 
-    public static function parseDataJson($results, $column = "data")
+    public static function parseDataJson($results, $column = null)
     {
+        if ($column == null) {
+            $column = "data";
+        }
+
         foreach ($results as &$row) {
             $dataValue = $row[$column];
             $dataValue = json_decode($dataValue, true);
@@ -229,8 +237,16 @@ class Tools
         return $results;
     }
 
-    public static function formatDate(array $data, string $column = "date", string $format = "Y-m-d h:i:s")
+    public static function formatDate(array $data, string $column = null, string $format = null)
     {
+        if ($column == null) {
+            $column = "date";
+        }
+
+        if ($format == null) {
+            $format = "Y-m-d h:i:s";
+        }
+
         foreach ($data as &$row) {
             $dataValue = $row[$column];
             $dataValue = date($format, strtotime($dataValue));

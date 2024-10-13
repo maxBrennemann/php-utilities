@@ -56,11 +56,11 @@ class Tools
     /**
      * deletes a running task from the database by key
      * 
-     * @param String $key
+     * @param string $key
      * 
      * @return void
      */
-    static function delete(String $key)
+    static function delete(string $key)
     {
         $query = "DELETE FROM running_tasks WHERE data_key = :dataKey;";
         DBAccess::deleteQuery($query, [
@@ -71,11 +71,11 @@ class Tools
     /**
      * reads runnings tasks from the database by key
      * 
-     * @param String $key
+     * @param string $key
      * 
      * @return array|null
      */
-    static function read(String $key): ?array
+    static function read(string $key)
     {
         $query = "SELECT data_value FROM running_tasks WHERE data_key = :dataKey;";
         $result = DBAccess::selectQuery($query, [
@@ -96,7 +96,7 @@ class Tools
      * 
      * @param int $id is 0 if the task exists or was not found, otherwise the id of the task
      */
-    static function write(string $key, array $value): int
+    static function write(string $key, array $value)
     {
         if ($key == null || $value == null) {
             return 0;

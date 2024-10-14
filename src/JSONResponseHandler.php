@@ -5,7 +5,7 @@ namespace MaxBrennemann\PhpUtilities;
 class JSONResponseHandler
 {
 
-    public static function throwError(int $httpStatusCode, $message)
+    public static function throwError($httpStatusCode, $message)
     {
         if (!headers_sent()) {
             http_response_code($httpStatusCode);
@@ -38,7 +38,7 @@ class JSONResponseHandler
         echo json_encode(array("message" => "OK"));
     }
 
-    public static function returnNotFound(string $additionalMessage = null)
+    public static function returnNotFound($additionalMessage = null)
     {
         if ($additionalMessage == null) {
             $additionalMessage = "";

@@ -173,8 +173,24 @@ class Tools
      * @param string $status
      * @param string $initiator
      */
-    static function log(string $logAction, string $logComment = "", array $additionalInfo = [], string $status = "", string $initiator = "")
+    static function log(string $logAction, string $logComment = null, array $additionalInfo = null, string $status = null, string $initiator = null)
     {
+        if ($logComment == null) {
+            $logComment = "";
+        }
+
+        if ($additionalInfo == null) {
+            $additionalInfo = [];
+        }
+
+        if ($status == null) {
+            $status = "";
+        }
+
+        if ($initiator == null) {
+            $initiator = "";
+        }
+
         if (strlen($logAction) > 32 || strlen($logComment) > 128 || strlen($status) > 32 || strlen($initiator) > 32) {
             return;
         }

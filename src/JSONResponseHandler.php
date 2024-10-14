@@ -38,8 +38,12 @@ class JSONResponseHandler
         echo json_encode(array("message" => "OK"));
     }
 
-    public static function returnNotFound(string $additionalMessage = "")
+    public static function returnNotFound(string $additionalMessage = null)
     {
+        if ($additionalMessage == null) {
+            $additionalMessage = "";
+        }
+
         if (!headers_sent()) {
             http_response_code(404);
         }

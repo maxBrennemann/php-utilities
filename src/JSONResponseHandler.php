@@ -59,4 +59,14 @@ class JSONResponseHandler
 
         die();
     }
+
+    public static function outputHeaderJSON()
+    {
+        session_start();
+
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header('Access-Control-Allow-Origin: http://localhost:5173');
+        header('Content-Type: application/json; charset=utf-8');
+    }
 }

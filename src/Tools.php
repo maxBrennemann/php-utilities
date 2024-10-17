@@ -28,7 +28,7 @@ class Tools
      * @param int $id
      * @param array $data
      */
-    static function output(int $id, array $data)
+    static function output($id, $data)
     {
         echo "id: $id" . PHP_EOL;
         echo "data: " . json_encode($data) . PHP_EOL;
@@ -60,7 +60,7 @@ class Tools
      * 
      * @return void
      */
-    static function delete(string $key)
+    static function delete($key)
     {
         $query = "DELETE FROM running_tasks WHERE data_key = :dataKey;";
         DBAccess::deleteQuery($query, [
@@ -75,7 +75,7 @@ class Tools
      * 
      * @return array|null
      */
-    static function read(string $key)
+    static function read($key)
     {
         $query = "SELECT data_value FROM running_tasks WHERE data_key = :dataKey;";
         $result = DBAccess::selectQuery($query, [
@@ -96,7 +96,7 @@ class Tools
      * 
      * @param int $id is 0 if the task exists or was not found, otherwise the id of the task
      */
-    static function write(string $key, array $value)
+    static function write($key, $value)
     {
         if ($key == null || $value == null) {
             return 0;
@@ -123,7 +123,7 @@ class Tools
         return $id;
     }
 
-    static function outputLog(string $message, string $tag = null, string $type = null)
+    static function outputLog($message, $tag = null, $type = null)
     {
         if ($tag == null) {
             $tag = "";
@@ -173,8 +173,24 @@ class Tools
      * @param string $status
      * @param string $initiator
      */
-    static function log(string $logAction, string $logComment = "", array $additionalInfo = [], string $status = "", string $initiator = "")
+    static function log($logAction, $logComment = null, $additionalInfo = null, $status = null, $initiator = null)
     {
+        if ($logComment == null) {
+            $logComment = "";
+        }
+
+        if ($additionalInfo == null) {
+            $additionalInfo = [];
+        }
+
+        if ($status == null) {
+            $status = "";
+        }
+
+        if ($initiator == null) {
+            $initiator = "";
+        }
+
         if (strlen($logAction) > 32 || strlen($logComment) > 128 || strlen($status) > 32 || strlen($initiator) > 32) {
             return;
         }
@@ -237,7 +253,7 @@ class Tools
         return $results;
     }
 
-    public static function formatDate(array $data, string $column = null, string $format = null)
+    public static function formatDate($data, $column = null, $format = null)
     {
         if ($column == null) {
             $column = "date";

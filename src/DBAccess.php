@@ -27,7 +27,7 @@ class DBAccess
 		}
 	}
 
-	public static function selectQuery(string $query, $params = NULL)
+	public static function selectQuery($query, $params = NULL)
 	{
 		self::createConnection();
 
@@ -130,7 +130,7 @@ class DBAccess
 	 * 
 	 * @return int
 	 */
-	public static function insertMultiple(string $queryPart, array $data)
+	public static function insertMultiple($queryPart, $data)
 	{
 		if ($data == null || !is_array($data) || count($data) == 0) {
 			return;

@@ -176,8 +176,6 @@ class DBAccess
 
 		self::$statement = self::$connection->prepare($query);
 		self::$statement->execute();
-
-		self::$statement->execute();
 	}
 
 	public static function getLastInsertId()

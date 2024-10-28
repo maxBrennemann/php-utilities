@@ -1,6 +1,6 @@
 <?php
 
-namespace MaxBrennemann\PhpUtilities;
+namespace MaxBrennemann\PhpUtilities\Migrations;
 
 use MaxBrennemann\PhpUtilities\DBAccess;
 use MaxBrennemann\PhpUtilities\Tools;

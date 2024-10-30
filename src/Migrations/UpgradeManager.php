@@ -138,7 +138,7 @@ class UpgradeManager
 
     private static function checkForInitialization()
     {
-        $query = "SELECT * FROM information_schema.tables WHERE table_name = ':migrationTableName' LIMIT 1;";
+        $query = "SELECT * FROM information_schema.tables WHERE table_name = :migrationTableName LIMIT 1;";
         $data = DBAccess::selectQuery($query, [
             "migrationTableName" => self::$migrationTableName,
         ]);

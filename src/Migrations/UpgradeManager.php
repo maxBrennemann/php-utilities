@@ -152,7 +152,7 @@ class UpgradeManager
     {
         Tools::outputLog("initializing migration", "migration");
         $query = "CREATE TABLE " . self::$migrationTableName . " (
-            id INT NOT NULL,
+            id INT NOT NULL AUTO_INCREMENT,
             migration_name VARCHAR(255) NOT NULL,
             migration_date DATE,
             file_name VARCHAR(255) NOT NULL,

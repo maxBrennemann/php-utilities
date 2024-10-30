@@ -2,22 +2,28 @@
 
 namespace MaxBrennemann\PhpUtilities\Migrations;
 
+use Exception;
 use MaxBrennemann\PhpUtilities\DBAccess;
 use MaxBrennemann\PhpUtilities\Tools;
 
 class UpgradeManager
 {
 
-    private static bool $forceUpdate = false;
-    private static string $path = "app/Migrations";
+    private static $forceUpdate = false;
+    private static $path = "app/Migrations";
+    private static $migrationTableName = "migration_tracker";
 
-    public static function upgrade($forceUpdate = false, $path = "")
+    public static function upgrade($forceUpdate = null, $path = null)
     {
-        if ($path != "") {
+        if ($path != null && $path != "") {
             self::$path = $path;
         }
 
         self::$forceUpdate = $forceUpdate;
+        if ($forceUpdate == null) {
+            self::$forceUpdate = false;
+        }
+
         self::checkForInitialization();
         $matches = self::checkForSQLQueries();
         self::executeMatches($matches);
@@ -27,7 +33,7 @@ class UpgradeManager
 
     private static function checkForSQLQueries()
     {
-        $query = "SELECT migration_date FROM migration_tracker ORDER BY migration_date DESC LIMIT 1";
+        $query = "SELECT migration_date FROM " . self::$migrationTableName . " ORDER BY migration_date DESC LIMIT 1";
         $data = DBAccess::selectQuery($query);
         $initDate = strtotime("1970-01-01");
         if ($data != null) {
@@ -65,7 +71,7 @@ class UpgradeManager
 
         $matches = [];
         foreach ($possibleMatches as $pMatch) {
-            $query = "SELECT id FROM migration_tracker WHERE `migration_date` = :mDate AND `migration_name` = :mName LIMIT 1;";
+            $query = "SELECT id FROM " . self::$migrationTableName . " WHERE `migration_date` = :mDate AND `migration_name` = :mName LIMIT 1;";
             $data = DBAccess::selectQuery($query, [
                 "mDate" => $pMatch["date"],
                 "mName" => $pMatch["name"],
@@ -103,7 +109,7 @@ class UpgradeManager
         foreach ($queries as $query) {
             try {
                 DBAccess::executeQuery($query);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Tools::outputLog($e->getMessage(), "migration", "error");
 
                 $noError = false;
@@ -122,7 +128,7 @@ class UpgradeManager
     }
 
     private static function updateMigrationTracker($match) {
-        $query = "INSERT INTO migration_tracker (migration_name, migration_date, file_name) VALUES (:mName, :mDate, :fName);";
+        $query = "INSERT INTO " . self::$migrationTableName . " (migration_name, migration_date, file_name) VALUES (:mName, :mDate, :fName);";
         DBAccess::insertQuery($query, [
             "mDate" => $match["date"],
             "mName" => $match["name"],
@@ -132,8 +138,10 @@ class UpgradeManager
 
     private static function checkForInitialization()
     {
-        $query = "SELECT * FROM information_schema.tables WHERE table_name = 'migration_tracker' LIMIT 1;";
-        $data = DBAccess::selectQuery($query);
+        $query = "SELECT * FROM information_schema.tables WHERE table_name = ':migrationTableName' LIMIT 1;";
+        $data = DBAccess::selectQuery($query, [
+            "migrationTableName" => self::$migrationTableName,
+        ]);
 
         if ($data == null) {
             self::init();
@@ -143,7 +151,7 @@ class UpgradeManager
     private static function init()
     {
         Tools::outputLog("initializing migration", "migration");
-        $query = "CREATE TABLE migration_tracker (
+        $query = "CREATE TABLE " . self::$migrationTableName . " (
             id INT NOT NULL,
             migration_name VARCHAR(255) NOT NULL,
             migration_date DATE,
@@ -152,4 +160,13 @@ class UpgradeManager
         ) ENGINE = InnoDB;";
         DBAccess::executeQuery($query);
     }
+
+    public static function setMigrationTableName($name) {
+        if ($name == null || strlen($name) == 0) {
+            Tools::outputLog("invalid table name", "migration", "error");
+        }
+
+        self::$migrationTableName = $name;
+    }
+
 }

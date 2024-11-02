@@ -27,6 +27,11 @@ class DBAccess
 		}
 	}
 
+	public static function getConnection() {
+        self::createConnection();
+        return self::$connection;
+    }
+
 	public static function selectQuery($query, $params = NULL)
 	{
 		self::createConnection();

@@ -1,5 +1,7 @@
 <?php
 
+namespace MaxBrennemann\PhpUtilities; 
+
 function insertTemplate($path, array $parameters = null)
 {
     if ($parameters == null) {

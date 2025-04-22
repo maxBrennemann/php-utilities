@@ -27,10 +27,11 @@ class DBAccess
 		}
 	}
 
-	public static function getConnection() {
-        self::createConnection();
-        return self::$connection;
-    }
+	public static function getConnection()
+	{
+		self::createConnection();
+		return self::$connection;
+	}
 
 	public static function selectQuery($query, $params = NULL)
 	{
@@ -197,19 +198,19 @@ class DBAccess
 		return self::$statement->rowCount();
 	}
 
-	/* 
-	##### EXAMPLE #####
-	EXPORT_DATABASE("localhost","user","pass","db_name" ); 
-	
-	##### Notes #####
-		* (optional) 5th parameter: to backup specific tables only,like: array("mytable1","mytable2",...)   
-		* (optional) 6th parameter: backup filename (otherwise, it creates random name)
-		* IMPORTANT NOTE ! Many people replaces strings in SQL file, which is not recommended. READ THIS:  http://puvox.software/tools/wordpress-migrator
-		* If you need, you can check "import.php" too
-	*/
-
-	// by https://github.com/ttodua/useful-php-scripts //
-	public static function EXPORT_DATABASE($host, $user, $pass, $name, $tables = false, $backup_name = false)
+	/**
+	 * by https://github.com/ttodua/useful-php-scripts
+	 * ##### EXAMPLE #####
+	 * EXPORT_DATABASE("localhost","user","pass","db_name" ); 
+	 * 
+	 * ##### Notes #####
+	 * (optional) 5th parameter: to backup specific tables only,like: array("mytable1","mytable2",...)   
+	 * (optional) 6th parameter: backup filename (otherwise, it creates random name)
+	 * IMPORTANT NOTE ! Many people replaces strings in SQL file, which is not recommended.
+	 * READ THIS:  http://puvox.software/tools/wordpress-migrator
+	 * If you need, you can check "import.php" too
+	 */
+	public static function EXPORT_DATABASE($host, $user, $pass, $name, $tables = false, $backup_name = false, $send_headers = true)
 	{
 		set_time_limit(3000);
 		$mysqli = new \mysqli($host, $user, $pass, $name);
@@ -265,11 +266,15 @@ class DBAccess
 		}
 		$content .= "\r\n\r\n/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\r\n/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\r\n/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;";
 		$backup_name = $backup_name ? $backup_name : $name . '___(' . date('H-i-s') . '_' . date('d-m-Y') . ').sql';
-		ob_get_clean();
-		header('Content-Type: application/octet-stream');
-		header("Content-Transfer-Encoding: Binary");
-		header('Content-Length: ' . (function_exists('mb_strlen') ? mb_strlen($content, '8bit') : strlen($content)));
-		header("Content-disposition: attachment; filename=\"" . $backup_name . "\"");
+
+		if ($send_headers) {
+			ob_get_clean();
+			header('Content-Type: application/octet-stream');
+			header("Content-Transfer-Encoding: Binary");
+			header('Content-Length: ' . (function_exists('mb_strlen') ? mb_strlen($content, '8bit') : strlen($content)));
+			header("Content-disposition: attachment; filename=\"" . $backup_name . "\"");
+		}
+		
 		return $content;
 	}
 

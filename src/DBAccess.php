@@ -135,10 +135,10 @@ class DBAccess
 	 * 
 	 * @return int
 	 */
-	public static function insertMultiple($queryPart, $data)
+	public static function insertMultiple($queryPart, $data): int
 	{
 		if ($data == null || !is_array($data) || count($data) == 0) {
-			return;
+			return 0;
 		}
 
 		$values = str_repeat('?,', count($data[0]) - 1) . '?';
@@ -241,7 +241,7 @@ class DBAccess
 					}
 					$content .= "\n(";
 					for ($j = 0; $j < $fields_amount; $j++) {
-						$row[$j] = str_replace("\n", "\\n", addslashes($row[$j]));
+						$row[$j] = str_replace("\n", "\\n", addslashes($row[$j] ?? ""));
 						if (isset($row[$j])) {
 							$content .= '"' . $row[$j] . '"';
 						} else {

@@ -154,24 +154,31 @@ class DBAccess
 
 	private static function bindParams(&$params)
 	{
-		if ($params != NULL) {
-			foreach ($params as $key => &$val) {
-				$dataType = getType($val);
-				switch ($dataType) {
-					case "integer":
-						self::$statement->bindParam($key, $val, \PDO::PARAM_INT);
-						break;
-					case "string":
-						self::$statement->bindParam($key, $val, \PDO::PARAM_STR);
-						break;
-					case "array":
-						$val = json_encode($val);
-						self::$statement->bindParam($key, $val, \PDO::PARAM_STR);
-						break;
-					case "NULL":
-						self::$statement->bindParam($key, $val, \PDO::PARAM_NULL);
-						break;
-				}
+		if ($params == NULL) {
+			return;
+		}
+
+		foreach ($params as $key => &$val) {
+			$dataType = getType($val);
+			$paramKey = $key;
+			if (is_numeric($paramKey)) {
+				$paramKey++;
+			}
+
+			switch ($dataType) {
+				case "integer":
+					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_INT);
+					break;
+				case "string":
+					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_STR);
+					break;
+				case "array":
+					$val = json_encode($val);
+					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_STR);
+					break;
+				case "NULL":
+					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_NULL);
+					break;
 			}
 		}
 	}

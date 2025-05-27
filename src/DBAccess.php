@@ -24,6 +24,7 @@ class DBAccess
 			self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		} catch (\PDOException $e) {
 			JSONResponseHandler::throwError(500, "Error connecting to database:<br>" . $e);
+			error_log($e->getMessage());
 		}
 	}
 
@@ -49,6 +50,7 @@ class DBAccess
 			$result = self::$statement->fetchAll(\PDO::FETCH_ASSOC);
 		} catch (\Exception $e) {
 			JSONResponseHandler::throwError(500, "Error executing select query: " . $e->getMessage());
+			error_log($e->getMessage() . " " . $query);
 		}
 
 		return $result;
@@ -83,6 +85,7 @@ class DBAccess
 			$response = self::$statement->execute();
 		} catch (\Exception $e) {
 			JSONResponseHandler::throwError(500, "Error executing update query: " . $e->getMessage());
+			error_log($e->getMessage() . " " . $query);
 		}
 
 		return $response;
@@ -107,6 +110,7 @@ class DBAccess
 			self::$statement->execute();
 		} catch (\Exception $e) {
 			JSONResponseHandler::throwError(500, "Error executing delete query: " . $e->getMessage());
+			error_log($e->getMessage() . " " . $query);
 		}
 	}
 
@@ -122,6 +126,7 @@ class DBAccess
 			$lastInsertId = self::$connection->lastInsertId();
 		} catch (\Exception $e) {
 			JSONResponseHandler::throwError(500, "Error executing insert query: " . $e->getMessage());
+			error_log($e->getMessage() . " " . $query);
 		}
 
 		return $lastInsertId;

@@ -23,8 +23,8 @@ class DBAccess
 			self::$connection = new \PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
 			self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		} catch (\PDOException $e) {
-			JSONResponseHandler::throwError(500, "Error connecting to database:<br>" . $e);
 			error_log($e->getMessage());
+			JSONResponseHandler::throwError(500, "Error connecting to database:<br>" . $e);
 		}
 	}
 
@@ -49,8 +49,8 @@ class DBAccess
 			self::$statement->execute();
 			$result = self::$statement->fetchAll(\PDO::FETCH_ASSOC);
 		} catch (\Exception $e) {
-			JSONResponseHandler::throwError(500, "Error executing select query: " . $e->getMessage());
 			error_log($e->getMessage() . " " . $query);
+			JSONResponseHandler::throwError(500, "Error executing select query: " . $e->getMessage());
 		}
 
 		return $result;
@@ -84,8 +84,8 @@ class DBAccess
 		try {
 			$response = self::$statement->execute();
 		} catch (\Exception $e) {
-			JSONResponseHandler::throwError(500, "Error executing update query: " . $e->getMessage());
 			error_log($e->getMessage() . " " . $query);
+			JSONResponseHandler::throwError(500, "Error executing update query: " . $e->getMessage());
 		}
 
 		return $response;
@@ -109,8 +109,8 @@ class DBAccess
 		try {
 			self::$statement->execute();
 		} catch (\Exception $e) {
-			JSONResponseHandler::throwError(500, "Error executing delete query: " . $e->getMessage());
 			error_log($e->getMessage() . " " . $query);
+			JSONResponseHandler::throwError(500, "Error executing delete query: " . $e->getMessage());
 		}
 	}
 
@@ -125,8 +125,8 @@ class DBAccess
 			self::$statement->execute();
 			$lastInsertId = self::$connection->lastInsertId();
 		} catch (\Exception $e) {
-			JSONResponseHandler::throwError(500, "Error executing insert query: " . $e->getMessage());
 			error_log($e->getMessage() . " " . $query);
+			JSONResponseHandler::throwError(500, "Error executing insert query: " . $e->getMessage());
 		}
 
 		return $lastInsertId;

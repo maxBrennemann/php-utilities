@@ -30,6 +30,7 @@ class DBAccess
 			self::$connection = new PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
 			self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		} catch (PDOException $e) {
+			$_ENV["SQL_ERROR"] = true;
 			throw new RuntimeException("Database connection failed: " . $e->getMessage());
 		}
 	}
@@ -48,6 +49,7 @@ class DBAccess
 		self::$lastParams = $params ?? [];
 
 		if ($query == "") {
+			$_ENV["SQL_ERROR"] = true;
 			throw new RuntimeException("Empty query provided.");
 		}
 
@@ -58,6 +60,7 @@ class DBAccess
 			self::$statement->execute();
 			$result = self::$statement->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Exception $e) {
+			$_ENV["SQL_ERROR"] = true;
 			throw new RuntimeException("Error executing select query: " . $e->getMessage());
 		}
 
@@ -95,6 +98,7 @@ class DBAccess
 		try {
 			$response = self::$statement->execute();
 		} catch (\Exception $e) {
+			$_ENV["SQL_ERROR"] = true;
 			throw new RuntimeException("Error executing update query: " . $e->getMessage());
 		}
 
@@ -122,6 +126,7 @@ class DBAccess
 		try {
 			self::$statement->execute();
 		} catch (\Exception $e) {
+			$_ENV["SQL_ERROR"] = true;
 			throw new RuntimeException("Error executing delete query: " . $e->getMessage());
 		}
 	}
@@ -140,8 +145,8 @@ class DBAccess
 			self::$statement->execute();
 			$lastInsertId = self::$connection->lastInsertId();
 		} catch (\Exception $e) {
-			error_log($e->getMessage() . " " . $query);
-			JSONResponseHandler::throwError(500, "Error executing insert query: " . $e->getMessage());
+			$_ENV["SQL_ERROR"] = true;
+			throw new RuntimeException("Error executing insert query: " . $e->getMessage());
 		}
 
 		return $lastInsertId;
@@ -227,7 +232,7 @@ class DBAccess
 		return self::$statement->rowCount();
 	}
 
-	public static function getInterpolatedQuery(): string
+	public static function getInterpolatedQuery()
 	{
 		$sql = self::$lastQuery;
 		$params = self::$lastParams;
@@ -238,6 +243,16 @@ class DBAccess
 		}
 
 		return $sql;
+	}
+
+	public static function getLastQuery()
+	{
+		return self::$lastQuery;
+	}
+
+	public static function getLastParams()
+	{
+		return self::$lastParams;
 	}
 
 	/**

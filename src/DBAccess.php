@@ -2,11 +2,18 @@
 
 namespace MaxBrennemann\PhpUtilities;
 
+use PDO;
+use PDOException;
+use RuntimeException;
+
 class DBAccess
 {
 
 	protected static $connection;
 	protected static $statement;
+
+	protected static string $lastQuery = "";
+	protected static array $lastParams = [];
 
 	private static function createConnection()
 	{
@@ -20,11 +27,10 @@ class DBAccess
 			$username = $_ENV["DB_USERNAME"];
 			$password = $_ENV["DB_PASSWORD"];
 
-			self::$connection = new \PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
-			self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		} catch (\PDOException $e) {
-			error_log($e->getMessage());
-			JSONResponseHandler::throwError(500, "Error connecting to database:<br>" . $e);
+			self::$connection = new PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
+			self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		} catch (PDOException $e) {
+			throw new RuntimeException("Database connection failed: " . $e->getMessage());
 		}
 	}
 
@@ -38,8 +44,11 @@ class DBAccess
 	{
 		self::createConnection();
 
+		self::$lastQuery = $query;
+		self::$lastParams = $params;
+
 		if ($query == "") {
-			JSONResponseHandler::throwError(500, "Error");
+			throw new RuntimeException("Empty query provided.");
 		}
 
 		self::$statement = self::$connection->prepare($query);
@@ -47,10 +56,9 @@ class DBAccess
 
 		try {
 			self::$statement->execute();
-			$result = self::$statement->fetchAll(\PDO::FETCH_ASSOC);
+			$result = self::$statement->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Exception $e) {
-			error_log($e->getMessage() . " " . $query);
-			JSONResponseHandler::throwError(500, "Error executing select query: " . $e->getMessage());
+			throw new RuntimeException("Error executing select query: " . $e->getMessage());
 		}
 
 		return $result;
@@ -78,14 +86,16 @@ class DBAccess
 	{
 		self::createConnection();
 
+		self::$lastQuery = $query;
+		self::$lastParams = $params;
+
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
 
 		try {
 			$response = self::$statement->execute();
 		} catch (\Exception $e) {
-			error_log($e->getMessage() . " " . $query);
-			JSONResponseHandler::throwError(500, "Error executing update query: " . $e->getMessage());
+			throw new RuntimeException("Error executing update query: " . $e->getMessage());
 		}
 
 		return $response;
@@ -103,20 +113,25 @@ class DBAccess
 	{
 		self::createConnection();
 
+		self::$lastQuery = $query;
+		self::$lastParams = $params;
+
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
 
 		try {
 			self::$statement->execute();
 		} catch (\Exception $e) {
-			error_log($e->getMessage() . " " . $query);
-			JSONResponseHandler::throwError(500, "Error executing delete query: " . $e->getMessage());
+			throw new RuntimeException("Error executing delete query: " . $e->getMessage());
 		}
 	}
 
 	public static function insertQuery($query, $params = NULL)
 	{
 		self::createConnection();
+
+		self::$lastQuery = $query;
+		self::$lastParams = $params;
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -146,6 +161,8 @@ class DBAccess
 		if ($data == null || !is_array($data) || count($data) == 0) {
 			return 0;
 		}
+		self::$lastQuery = $queryPart;
+		self::$lastParams = $data;
 
 		$values = str_repeat('?,', count($data[0]) - 1) . '?';
 		$sql = $queryPart .
@@ -172,17 +189,17 @@ class DBAccess
 
 			switch ($dataType) {
 				case "integer":
-					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_INT);
+					self::$statement->bindParam($paramKey, $val, PDO::PARAM_INT);
 					break;
 				case "string":
-					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_STR);
+					self::$statement->bindParam($paramKey, $val, PDO::PARAM_STR);
 					break;
 				case "array":
 					$val = json_encode($val);
-					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_STR);
+					self::$statement->bindParam($paramKey, $val, PDO::PARAM_STR);
 					break;
 				case "NULL":
-					self::$statement->bindParam($paramKey, $val, \PDO::PARAM_NULL);
+					self::$statement->bindParam($paramKey, $val, PDO::PARAM_NULL);
 					break;
 			}
 		}
@@ -208,6 +225,19 @@ class DBAccess
 	public static function getAffectedRows()
 	{
 		return self::$statement->rowCount();
+	}
+
+	public static function getInterpolatedQuery(): string
+	{
+		$sql = self::$lastQuery;
+		$params = self::$lastParams;
+
+		foreach ($params as $param) {
+			$replacement = is_numeric($param) ? $param : "'" . addslashes((string)$param) . "'";
+			$sql = preg_replace('/\?/', $replacement, $sql, 1);
+		}
+
+		return $sql;
 	}
 
 	/**
@@ -286,7 +316,7 @@ class DBAccess
 			header('Content-Length: ' . (function_exists('mb_strlen') ? mb_strlen($content, '8bit') : strlen($content)));
 			header("Content-disposition: attachment; filename=\"" . $backup_name . "\"");
 		}
-		
+
 		return $content;
 	}
 

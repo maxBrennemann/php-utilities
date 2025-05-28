@@ -45,7 +45,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params;
+		self::$lastParams = $params ?? [];
 
 		if ($query == "") {
 			throw new RuntimeException("Empty query provided.");
@@ -87,7 +87,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params;
+		self::$lastParams = $params ?? [];
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -114,7 +114,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params;
+		self::$lastParams = $params ?? [];
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -131,7 +131,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params;
+		self::$lastParams = $params ?? [];
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -162,7 +162,7 @@ class DBAccess
 			return 0;
 		}
 		self::$lastQuery = $queryPart;
-		self::$lastParams = $data;
+		self::$lastParams = $data ?? [];
 
 		$values = str_repeat('?,', count($data[0]) - 1) . '?';
 		$sql = $queryPart .

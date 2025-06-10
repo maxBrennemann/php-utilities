@@ -86,7 +86,7 @@ class UpgradeManager
 
         return $matches;
     }
-    
+
     private static function executeMatches($matches)
     {
         foreach ($matches as $match) {
@@ -103,7 +103,8 @@ class UpgradeManager
         }
     }
 
-    private static function executeSQLQueries($queries, $match) {
+    private static function executeSQLQueries($queries, $match)
+    {
         $noError = true;
 
         foreach ($queries as $query) {
@@ -127,7 +128,8 @@ class UpgradeManager
         return true;
     }
 
-    private static function updateMigrationTracker($match) {
+    private static function updateMigrationTracker($match)
+    {
         $query = "INSERT INTO " . self::$migrationTableName . " (migration_name, migration_date, file_name) VALUES (:mName, :mDate, :fName);";
         DBAccess::insertQuery($query, [
             "mDate" => $match["date"],
@@ -161,12 +163,12 @@ class UpgradeManager
         DBAccess::executeQuery($query);
     }
 
-    public static function setMigrationTableName($name) {
+    public static function setMigrationTableName($name)
+    {
         if ($name == null || strlen($name) == 0) {
             Tools::outputLog("invalid table name", "migration", "error");
         }
 
         self::$migrationTableName = $name;
     }
-
 }

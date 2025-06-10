@@ -7,7 +7,7 @@ class Tools
 
     public static $data = [];
 
-    static function get($key)
+    public static function get($key)
     {
         if (isset(self::$data[$key])) {
             return self::$data[$key];
@@ -16,7 +16,7 @@ class Tools
         return null;
     }
 
-    static function add($key, $value)
+    public static function add($key, $value)
     {
         self::$data[$key] = $value;
     }
@@ -28,7 +28,7 @@ class Tools
      * @param int $id
      * @param array $data
      */
-    static function output($id, $data)
+    public static function output($id, $data)
     {
         echo "id: $id" . PHP_EOL;
         echo "data: " . json_encode($data) . PHP_EOL;
@@ -42,13 +42,13 @@ class Tools
         flush();
     }
 
-    static function normalizeString($term)
+    public static function normalizeString($term)
     {
         $term = iconv("utf-8", "ascii//TRANSLIT", $term);
         return $term;
     }
 
-    static function isValidEmail($email)
+    public static function isValidEmail($email)
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
@@ -75,7 +75,7 @@ class Tools
      * 
      * @return array|null
      */
-    static function read($key)
+    public static function read($key)
     {
         $query = "SELECT data_value FROM running_tasks WHERE data_key = :dataKey;";
         $result = DBAccess::selectQuery($query, [
@@ -96,7 +96,7 @@ class Tools
      * 
      * @param int $id is 0 if the task exists or was not found, otherwise the id of the task
      */
-    static function write($key, $value)
+    public static function write($key, $value)
     {
         if ($key == null || $value == null) {
             return 0;
@@ -123,7 +123,7 @@ class Tools
         return $id;
     }
 
-    static function outputLog($message, $tag = null, $type = null)
+    public static function outputLog($message, $tag = null, $type = null)
     {
         if ($tag == null) {
             $tag = "";
@@ -173,7 +173,7 @@ class Tools
      * @param string $status
      * @param string $initiator
      */
-    static function log($logAction, $logComment = null, $additionalInfo = null, $status = null, $initiator = null)
+    public static function log($logAction, $logComment = null, $additionalInfo = null, $status = null, $initiator = null)
     {
         if ($logComment == null) {
             $logComment = "";
@@ -205,7 +205,7 @@ class Tools
         ]);
     }
 
-    static function getLogs()
+    public static function getLogs()
     {
         $limit = (int) self::get("limit");
         $query = "SELECT * FROM logs ORDER BY id DESC LIMIT :limit;";

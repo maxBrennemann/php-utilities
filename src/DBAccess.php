@@ -12,8 +12,8 @@ class DBAccess
 	protected static $connection;
 	protected static $statement;
 
-	protected static string $lastQuery = "";
-	protected static array $lastParams = [];
+	protected static $lastQuery = "";
+	protected static $lastParams = [];
 
 	private static function createConnection()
 	{
@@ -46,7 +46,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params ?? [];
+		self::$lastParams = $params ? $params : [];
 
 		if ($query == "") {
 			$_ENV["SQL_ERROR"] = true;
@@ -90,7 +90,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params ?? [];
+		self::$lastParams = $params ? $params : [];
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -118,7 +118,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params ?? [];
+		self::$lastParams = $params ? $params : [];
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -136,7 +136,7 @@ class DBAccess
 		self::createConnection();
 
 		self::$lastQuery = $query;
-		self::$lastParams = $params ?? [];
+		self::$lastParams = $params ? $params : [];
 
 		self::$statement = self::$connection->prepare($query);
 		self::bindParams($params);
@@ -167,7 +167,7 @@ class DBAccess
 			return 0;
 		}
 		self::$lastQuery = $queryPart;
-		self::$lastParams = $data ?? [];
+		self::$lastParams = $data ? $data : [];
 
 		$values = str_repeat('?,', count($data[0]) - 1) . '?';
 		$sql = $queryPart .

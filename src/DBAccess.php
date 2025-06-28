@@ -15,7 +15,7 @@ class DBAccess
 	protected static $lastQuery = "";
 	protected static $lastParams = [];
 
-	private static function createConnection()
+	private static function createConnection(): void
 	{
 		if (self::$connection != null) {
 			return;
@@ -35,13 +35,13 @@ class DBAccess
 		}
 	}
 
-	public static function getConnection()
+	public static function getConnection(): PDO
 	{
 		self::createConnection();
 		return self::$connection;
 	}
 
-	public static function selectQuery($query, $params = NULL)
+	public static function selectQuery(string $query, $params = NULL): array
 	{
 		self::createConnection();
 
@@ -67,21 +67,23 @@ class DBAccess
 		return $result;
 	}
 
-	public static function selectAll($table)
+	public static function selectAll(string $table): array
 	{
 		return self::selectQuery("SELECT * FROM $table");
 	}
 
-	public static function selectAllByCondition($table, $condName, $condParam)
+	public static function selectAllByCondition($table, $condName, $condParam): array
 	{
 		return self::selectQuery("SELECT * FROM $table WHERE $condName = $condParam");
 	}
 
-	public static function selectColumnNames($table)
+	public static function selectColumnNames(string $table): array|null
 	{
-		$query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{$table}' AND TABLE_SCHEMA = '" . $_ENV["DB_DATABASE"] . "'";
-		if ($query == null)
+		$query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table' AND TABLE_SCHEMA = '" . $_ENV["DB_DATABASE"] . "'";
+		if ($query == null) {
 			return null;
+		}
+
 		return self::selectQuery($query);
 	}
 
@@ -131,7 +133,7 @@ class DBAccess
 		}
 	}
 
-	public static function insertQuery($query, $params = NULL)
+	public static function insertQuery(string $query, $params = NULL)
 	{
 		self::createConnection();
 

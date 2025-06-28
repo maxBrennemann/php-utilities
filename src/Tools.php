@@ -16,7 +16,7 @@ class Tools
         return null;
     }
 
-    public static function add($key, $value)
+    public static function add($key, $value): void
     {
         self::$data[$key] = $value;
     }
@@ -48,7 +48,7 @@ class Tools
         return $term;
     }
 
-    public static function isValidEmail($email)
+    public static function isValidEmail($email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
@@ -60,7 +60,7 @@ class Tools
      * 
      * @return void
      */
-    static function delete($key)
+    public static function delete($key)
     {
         $query = "DELETE FROM running_tasks WHERE data_key = :dataKey;";
         DBAccess::deleteQuery($query, [
@@ -123,7 +123,7 @@ class Tools
         return $id;
     }
 
-    public static function outputLog($message, $tag = null, $type = null)
+    public static function outputLog(string $message, $tag = null, $type = null)
     {
         if ($tag == null) {
             $tag = "";
@@ -205,7 +205,7 @@ class Tools
         ]);
     }
 
-    public static function getLogs()
+    public static function getLogs(): void
     {
         $limit = (int) self::get("limit");
         $query = "SELECT * FROM logs ORDER BY id DESC LIMIT :limit;";

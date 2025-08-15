@@ -201,6 +201,9 @@ class DBAccess
 				case "string":
 					self::$statement->bindParam($paramKey, $val, PDO::PARAM_STR);
 					break;
+				case "double":
+					self::$statement->bindParam($paramKey, $val, PDO::PARAM_STR);
+					break;
 				case "array":
 					$val = json_encode($val);
 					self::$statement->bindParam($paramKey, $val, PDO::PARAM_STR);

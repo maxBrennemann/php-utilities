@@ -87,7 +87,7 @@ class DBAccess
 		return self::selectQuery($query);
 	}
 
-	public static function updateQuery($query, $params = NULL)
+	public static function updateQuery($query, $params = NULL): bool
 	{
 		self::createConnection();
 
@@ -115,7 +115,7 @@ class DBAccess
 		return self::$connection->exec($query);
 	}
 
-	public static function deleteQuery($query, $params = NULL)
+	public static function deleteQuery($query, $params = NULL): void
 	{
 		self::createConnection();
 
@@ -181,7 +181,7 @@ class DBAccess
 		return self::$connection->lastInsertId();
 	}
 
-	private static function bindParams(&$params)
+	private static function bindParams(&$params): void
 	{
 		if ($params == NULL) {
 			return;
@@ -215,7 +215,7 @@ class DBAccess
 		}
 	}
 
-	public static function executeQuery($query)
+	public static function executeQuery($query): void
 	{
 		self::createConnection();
 
@@ -250,12 +250,12 @@ class DBAccess
 		return $sql;
 	}
 
-	public static function getLastQuery()
+	public static function getLastQuery(): string
 	{
 		return self::$lastQuery;
 	}
 
-	public static function getLastParams()
+	public static function getLastParams(): array
 	{
 		return self::$lastParams;
 	}
@@ -272,7 +272,7 @@ class DBAccess
 	 * READ THIS:  http://puvox.software/tools/wordpress-migrator
 	 * If you need, you can check "import.php" too
 	 */
-	public static function EXPORT_DATABASE($host, $user, $pass, $name, $tables = false, $backup_name = false, $send_headers = true)
+	public static function EXPORT_DATABASE($host, $user, $pass, $name, $tables = false, $backup_name = false, $send_headers = true): string
 	{
 		set_time_limit(3000);
 		$mysqli = new \mysqli($host, $user, $pass, $name);
@@ -340,17 +340,17 @@ class DBAccess
 		return $content;
 	}
 
-	private static function closeStatement()
+	private static function closeStatement(): void
 	{
 		self::$statement = null;
 	}
 
-	private static function closeConnection()
+	private static function closeConnection(): void
 	{
 		self::$connection = null;
 	}
 
-	public static function close()
+	public static function close(): void
 	{
 		self::closeStatement();
 		self::closeConnection();

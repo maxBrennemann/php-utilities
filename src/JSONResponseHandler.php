@@ -37,6 +37,10 @@ class JSONResponseHandler
         }
     }
 
+    /**
+     * @param array<mixed, mixed> $data
+     * @return void
+     */
     public static function sendResponse(array $data): void
     {
         if (!headers_sent()) {
@@ -46,7 +50,7 @@ class JSONResponseHandler
         echo json_encode($data);
     }
 
-    public static function returnOK()
+    public static function returnOK(): void
     {
         if (!headers_sent()) {
             http_response_code(200);
@@ -79,7 +83,7 @@ class JSONResponseHandler
         die();
     }
 
-    public static function outputHeaderJSON()
+    public static function outputHeaderJSON(): void
     {
         session_start();
 

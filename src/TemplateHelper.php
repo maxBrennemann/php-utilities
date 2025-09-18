@@ -5,7 +5,7 @@ namespace MaxBrennemann\PhpUtilities;
 class TemplateHelper
 {
 
-	public static function insertTemplate($path, ?array $parameters = null): void
+	public static function insertTemplate(string $path, ?array $parameters = null): void
 	{
 		if ($parameters == null) {
 			$parameters = [];

@@ -5,9 +5,10 @@ namespace MaxBrennemann\PhpUtilities;
 class Tools
 {
 
+    /** @var array<string, string> */
     public static $data = [];
 
-    public static function get($key)
+    public static function get(string $key): ?string
     {
         if (isset(self::$data[$key])) {
             return self::$data[$key];
@@ -16,7 +17,7 @@ class Tools
         return null;
     }
 
-    public static function add($key, $value): void
+    public static function add(string $key, string $value): void
     {
         self::$data[$key] = $value;
     }
@@ -26,9 +27,9 @@ class Tools
      * used to show data in eventsources
      * 
      * @param int $id
-     * @param array $data
+     * @param array<mixed> $data
      */
-    public static function output($id, $data)
+    public static function output(int $id, array $data): void
     {
         echo "id: $id" . PHP_EOL;
         echo "data: " . json_encode($data) . PHP_EOL;
@@ -42,13 +43,16 @@ class Tools
         flush();
     }
 
-    public static function normalizeString($term)
+    public static function normalizeString(string $term): string
     {
         $term = iconv("utf-8", "ascii//TRANSLIT", $term);
+        if (gettype($term) == "boolean") {
+            return "";
+        }
         return $term;
     }
 
-    public static function isValidEmail($email): bool
+    public static function isValidEmail(string $email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
@@ -60,7 +64,7 @@ class Tools
      * 
      * @return void
      */
-    public static function delete($key)
+    public static function delete($key): void
     {
         $query = "DELETE FROM running_tasks WHERE data_key = :dataKey;";
         DBAccess::deleteQuery($query, [
@@ -73,9 +77,9 @@ class Tools
      * 
      * @param string $key
      * 
-     * @return array|null
+     * @return array<mixed>|null
      */
-    public static function read($key)
+    public static function read(string $key): array|null
     {
         $query = "SELECT data_value FROM running_tasks WHERE data_key = :dataKey;";
         $result = DBAccess::selectQuery($query, [
@@ -92,11 +96,9 @@ class Tools
     /**
      * writes or updates running tasks to the database
      * 
-     * @param string $key
-     * 
-     * @param int $id is 0 if the task exists or was not found, otherwise the id of the task
+     * @return int is 0 if the task exists or was not found, otherwise the id of the task
      */
-    public static function write($key, $value)
+    public static function write(string $key, mixed $value): int
     {
         if ($key == null || $value == null) {
             return 0;
@@ -119,11 +121,10 @@ class Tools
             ]);
         }
 
-
         return $id;
     }
 
-    public static function outputLog(string $message, $tag = null, $type = null)
+    public static function outputLog(string $message, ?string $tag = null, ?string $type = null): void
     {
         if ($tag == null) {
             $tag = "";
@@ -169,11 +170,11 @@ class Tools
      * 
      * @param string $logAction
      * @param string $logComment
-     * @param array $additionalInfo
+     * @param array<mixed> $additionalInfo
      * @param string $status
      * @param string $initiator
      */
-    public static function log($logAction, $logComment = null, $additionalInfo = null, $status = null, $initiator = null)
+    public static function log(string $logAction, ?string $logComment = null, ?array $additionalInfo = null, ?string $status = null, ?string $initiator = null): void
     {
         if ($logComment == null) {
             $logComment = "";
@@ -191,7 +192,11 @@ class Tools
             $initiator = "";
         }
 
-        if (strlen($logAction) > 32 || strlen($logComment) > 128 || strlen($status) > 32 || strlen($initiator) > 32) {
+        if (strlen($logAction) > 32 
+            || strlen($logComment) > 128 
+            || strlen($status) > 32 
+            || strlen($initiator) > 32
+        ) {
             return;
         }
 
@@ -216,14 +221,25 @@ class Tools
         JSONResponseHandler::sendResponse($data);
     }
 
-    public static function joinDataJson($results, $column = null)
+    /**
+     * @param array<int, array<string, string>> $results
+     * @param ?string $column
+     * @return array<int, array<string, string>>
+     */
+    public static function joinDataJson(array $results, ?string $column = null): array
     {
         if ($column == null) {
             $column = "data";
         }
         
         foreach ($results as &$result) {
-            $data = json_decode($result[$column], true);
+            $json = $result[$column] ?? null;
+
+            if ($json == null) {
+                continue;
+            }
+
+            $data = json_decode($json, true);
 
             foreach ($data as $key => $value) {
                 if (isset($result[$key])) {
@@ -232,20 +248,31 @@ class Tools
 
                 $result[$key] = $value;
             }
+
             unset($result[$column]);
         }
 
         return $results;
     }
 
-    public static function parseDataJson($results, $column = null)
+    /**
+     * @param array<int, array<string, string>> $results
+     * @param ?string $column
+     * @return array<int, array<string, string>>
+     */
+    public static function parseDataJson(array $results, ?string $column = null): array
     {
         if ($column == null) {
             $column = "data";
         }
 
         foreach ($results as &$row) {
-            $dataValue = $row[$column];
+            $dataValue = $row[$column] ?? null;
+
+            if ($dataValue == null) {
+                continue;
+            }
+
             $dataValue = json_decode($dataValue, true);
             $row[$column] = $dataValue;
         }
@@ -253,7 +280,13 @@ class Tools
         return $results;
     }
 
-    public static function formatDate($data, $column = null, $format = null)
+    /**
+     * @param array<int, array<string, string>> $data
+     * @param ?string $column
+     * @param ?string $format
+     * @return array<int, array<string, string>>
+     */
+    public static function formatDate(array $data, ?string $column = null, ?string $format = null): array
     {
         if ($column == null) {
             $column = "date";
@@ -264,8 +297,18 @@ class Tools
         }
 
         foreach ($data as &$row) {
-            $dataValue = $row[$column];
-            $dataValue = date($format, strtotime($dataValue));
+            $dataValue = $row[$column] ?? null;
+
+            if ($dataValue == null) {
+                continue;
+            }
+
+            $time = strtotime($dataValue);
+            if ($time === false) {
+                continue;
+            }
+
+            $dataValue = date($format, $time);
             $row[$column] = $dataValue;
         }
 

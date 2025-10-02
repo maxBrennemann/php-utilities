@@ -11,5 +11,10 @@
             "email": "maxgoogelt@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "phpstan/phpstan": "^2.1"
+    },
+    "scripts": {
+        "phpstan": "php -d memory_limit=1G vendor/bin/phpstan analyse -c phpstan.neon"
+    }
 }

@@ -1,0 +1,13 @@
+# phpstan.neon
+parameters:
+  level: 7
+  paths:
+    - src
+
+  tmpDir: var/phpstan
+  parallel:
+    maximumNumberOfProcesses: 2
+
+  phpVersion: 80400
+
+  reportUnmatchedIgnoredErrors: true

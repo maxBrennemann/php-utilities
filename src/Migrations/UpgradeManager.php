@@ -13,7 +13,7 @@ class UpgradeManager
     private static $path = "app/Migrations";
     private static $migrationTableName = "migration_tracker";
 
-    public static function upgrade($forceUpdate = null, $path = null)
+    public static function upgrade($forceUpdate = null, $path = null): void
     {
         if ($path != null && $path != "") {
             self::$path = $path;
@@ -29,9 +29,9 @@ class UpgradeManager
         self::executeMatches($matches);
     }
 
-    public static function downgrade() {}
+    public static function downgrade(): void {}
 
-    private static function checkForSQLQueries()
+    private static function checkForSQLQueries(): array
     {
         $query = "SELECT migration_date FROM " . self::$migrationTableName . " ORDER BY migration_date DESC LIMIT 1";
         $data = DBAccess::selectQuery($query);
@@ -87,7 +87,7 @@ class UpgradeManager
         return $matches;
     }
 
-    private static function executeMatches($matches)
+    private static function executeMatches(array $matches): void
     {
         foreach ($matches as $match) {
             $fileName = $match["fileName"];
@@ -103,7 +103,7 @@ class UpgradeManager
         }
     }
 
-    private static function executeSQLQueries($queries, $match)
+    private static function executeSQLQueries(array $queries, array $match): bool
     {
         $noError = true;
 
@@ -128,7 +128,11 @@ class UpgradeManager
         return true;
     }
 
-    private static function updateMigrationTracker($match)
+    /**
+     * @param array<string, string> $match
+     * @return void
+     */
+    private static function updateMigrationTracker(array $match): void
     {
         $query = "INSERT INTO " . self::$migrationTableName . " (migration_name, migration_date, file_name) VALUES (:mName, :mDate, :fName);";
         DBAccess::insertQuery($query, [
@@ -138,7 +142,7 @@ class UpgradeManager
         ]);
     }
 
-    private static function checkForInitialization()
+    private static function checkForInitialization(): void
     {
         $query = "SELECT * FROM information_schema.tables WHERE table_name = :migrationTableName LIMIT 1;";
         $data = DBAccess::selectQuery($query, [
@@ -150,7 +154,7 @@ class UpgradeManager
         }
     }
 
-    private static function init()
+    private static function init(): void
     {
         Tools::outputLog("initializing migration", "migration");
         $query = "CREATE TABLE " . self::$migrationTableName . " (
@@ -163,9 +167,9 @@ class UpgradeManager
         DBAccess::executeQuery($query);
     }
 
-    public static function setMigrationTableName($name)
+    public static function setMigrationTableName(string $name): void
     {
-        if ($name == null || strlen($name) == 0) {
+        if (strlen($name) == 0) {
             Tools::outputLog("invalid table name", "migration", "error");
         }
 

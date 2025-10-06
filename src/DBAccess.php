@@ -10,8 +10,8 @@ use RuntimeException;
 class DBAccess
 {
 
-	protected static ?PDO $connection;
-	protected static ?PDOStatement $statement;
+	protected static ?PDO $connection = null;
+	protected static ?PDOStatement $statement = null;
 
 	protected static string $lastQuery = "";
 	/** @var array<string|int, mixed> */
@@ -31,6 +31,7 @@ class DBAccess
 
 			self::$connection = new PDO("mysql:host=$host;dbname=$database;charset=utf8", $username, $password);
 			self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			self::$connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		} catch (PDOException $e) {
 			$_ENV["SQL_ERROR"] = true;
 			throw new RuntimeException("Database connection failed: " . $e->getMessage());
@@ -92,7 +93,7 @@ class DBAccess
 	 */
 	public static function selectAllByCondition(string $table, string $condName, string $condParam): array
 	{
-		return self::selectQuery("SELECT * FROM $table WHERE $condName = $condParam");
+		return self::selectQuery("SELECT * FROM $table WHERE $condName = ?", [$condParam]);
 	}
 
 	/**

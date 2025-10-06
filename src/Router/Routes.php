@@ -8,14 +8,21 @@ use MaxBrennemann\PhpUtilities\Tools;
 class Routes
 {
 
+    /** @var array<string, array{class-string, string}> */
     protected static $getRoutes = [];
+
+    /** @var array<string, array{class-string, string}> */
     protected static $postRoutes = [];
+
+    /** @var array<string, array{class-string, string}> */
     protected static $putRoutes = [];
+
+    /** @var array<string, array{class-string, string}> */
     protected static $deleteRoutes = [];
 
-    protected static function get($route)
+    protected static function get(string $route): void
     {
-        if (static::checkUrlPatterns($route, static::$getRoutes)) {
+        if (self::checkUrlPatterns($route, static::$getRoutes)) {
             return;
         }
 
@@ -27,9 +34,9 @@ class Routes
         self::callCallback($callback);
     }
 
-    protected static function post($route)
+    protected static function post(string $route): void
     {
-        if (static::checkUrlPatterns($route, static::$postRoutes)) {
+        if (self::checkUrlPatterns($route, static::$postRoutes)) {
             return;
         }
 
@@ -41,9 +48,9 @@ class Routes
         self::callCallback($callback);
     }
 
-    protected static function put($route)
+    protected static function put(string $route): void
     {
-        if (static::checkUrlPatterns($route, static::$putRoutes)) {
+        if (self::checkUrlPatterns($route, static::$putRoutes)) {
             return;
         }
 
@@ -55,9 +62,9 @@ class Routes
         self::callCallback($callback);
     }
 
-    protected static function delete($route)
+    protected static function delete(string $route): void
     {
-        if (static::checkUrlPatterns($route, static::$deleteRoutes)) {
+        if (self::checkUrlPatterns($route, static::$deleteRoutes)) {
             return;
         }
 
@@ -69,10 +76,15 @@ class Routes
         self::callCallback($callback);
     }
 
-    private static function checkUrlPatterns($url, $routes)
+    /**
+     * @param string $url
+     * @param array<string, array{class-string, string}> $routes
+     * @return bool
+     */
+    private static function checkUrlPatterns(string $url, array $routes): bool
     {
         foreach ($routes as $route => $callback) {
-            if (static::matchUrlPattern($url, $route)) {
+            if (self::matchUrlPattern($url, $route)) {
                 self::callCallback($callback);
                 return true;
             }
@@ -81,7 +93,7 @@ class Routes
         return false;
     }
 
-    private static function matchUrlPattern($url, $route)
+    private static function matchUrlPattern(string $url, string $route): bool
     {
         $urlParts = explode("/", $url);
         $routeParts = explode("/", $route);
@@ -106,12 +118,12 @@ class Routes
         return true;
     }
 
-    private static function setUrlParameter($key, $value)
+    private static function setUrlParameter(string $key, string $value): void
     {
         Tools::add($key, $value);
     }
 
-    public static function handleRequest($route)
+    public static function handleRequest(string $route): void
     {
         $method = $_SERVER["REQUEST_METHOD"];
         switch ($method) {
@@ -132,7 +144,11 @@ class Routes
         }
     }
 
-    private static function callCallback($callback)
+    /**
+     * @param callable|array{class-string, string} $callback
+     * @return void
+     */
+    private static function callCallback(callable|array $callback): void
     {
         if (!is_callable($callback)) {
             if ($_ENV["DEV_MODE"] === "true") {
@@ -141,6 +157,7 @@ class Routes
 
             JSONResponseHandler::throwError(500, "Internal server error");
         }
+        
         call_user_func($callback);
     }
 }

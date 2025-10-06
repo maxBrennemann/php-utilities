@@ -5,7 +5,7 @@ namespace MaxBrennemann\PhpUtilities;
 class Tools
 {
 
-    /** @var array<string, string> */
+    /** @var array<int|string, mixed> */
     public static $data = [];
 
     public static function get(string $key): ?string

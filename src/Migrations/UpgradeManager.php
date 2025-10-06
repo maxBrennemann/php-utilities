@@ -9,19 +9,20 @@ use MaxBrennemann\PhpUtilities\Tools;
 class UpgradeManager
 {
 
-    private static $forceUpdate = false;
-    private static $path = "app/Migrations";
-    private static $migrationTableName = "migration_tracker";
+    private static bool $forceUpdate = false;
+    private static string $path = "app/Migrations";
+    private static string $migrationTableName = "migration_tracker";
 
-    public static function upgrade($forceUpdate = null, $path = null): void
+    public static function upgrade(?bool $forceUpdate = null, ?string $path = null): void
     {
-        if ($path != null && $path != "") {
+        if ($path !== null && $path !== "") {
             self::$path = $path;
         }
 
-        self::$forceUpdate = $forceUpdate;
         if ($forceUpdate == null) {
             self::$forceUpdate = false;
+        } else {
+            self::$forceUpdate = $forceUpdate;
         }
 
         self::checkForInitialization();
@@ -31,6 +32,9 @@ class UpgradeManager
 
     public static function downgrade(): void {}
 
+    /**
+     * @return array<array{date: string, fileName: string, name: string}>
+     */
     private static function checkForSQLQueries(): array
     {
         $query = "SELECT migration_date FROM " . self::$migrationTableName . " ORDER BY migration_date DESC LIMIT 1";
@@ -56,8 +60,8 @@ class UpgradeManager
                 continue;
             }
 
-            $date = $parts[0];
-            $name = $parts[1];
+            $date = (string) $parts[0];
+            $name = (string) $parts[1];
 
             $migrationDate = strtotime($date);
             if ($migrationDate >= $initDate) {
@@ -87,6 +91,10 @@ class UpgradeManager
         return $matches;
     }
 
+    /**
+     * @param array<array{date: string, fileName: string, name: string}> $matches
+     * @return void
+     */
     private static function executeMatches(array $matches): void
     {
         foreach ($matches as $match) {
@@ -103,6 +111,11 @@ class UpgradeManager
         }
     }
 
+    /**
+     * @param array<string> $queries
+     * @param array{date: string, fileName: string, name: string} $match
+     * @return bool
+     */
     private static function executeSQLQueries(array $queries, array $match): bool
     {
         $noError = true;
@@ -129,7 +142,7 @@ class UpgradeManager
     }
 
     /**
-     * @param array<string, string> $match
+     * @param array{date: string, fileName: string, name: string} $match
      * @return void
      */
     private static function updateMigrationTracker(array $match): void

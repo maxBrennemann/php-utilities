@@ -5,6 +5,11 @@ namespace MaxBrennemann\PhpUtilities;
 class JSONResponseHandler
 {
 
+    /**
+     * @param int $httpStatusCode
+     * @param string|array<mixed> $message
+     * @return never
+     */
     public static function throwError(int $httpStatusCode, string|array $message): never
     {
         if (!headers_sent()) {
@@ -61,7 +66,7 @@ class JSONResponseHandler
         ]);
     }
 
-    public static function returnNotFound($additionalMessage = null): never
+    public static function returnNotFound(?string $additionalMessage = null): never
     {
         if ($additionalMessage == null) {
             $additionalMessage = "";

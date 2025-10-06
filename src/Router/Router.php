@@ -7,14 +7,16 @@ use MaxBrennemann\PhpUtilities\Tools;
 class Router
 {
 
-    public static function getParameters()
+    public static function getParameters(): void
     {
-        if (file_get_contents("php://input") != "") {
-            $PHP_INPUT = json_decode(file_get_contents("php://input"), true);
+        $PHPInput = file_get_contents("php://input");
 
-            if ($PHP_INPUT != null) {
-                Tools::$data = array_merge(Tools::$data, $PHP_INPUT);
-                $_POST = array_merge($_POST, $PHP_INPUT);
+        if ($PHPInput !== "" && $PHPInput !== false) {
+            $parsedPHPInput = json_decode($PHPInput, true);
+
+            if ($parsedPHPInput != null) {
+                Tools::$data = array_merge(Tools::$data, $parsedPHPInput);
+                $_POST = array_merge($_POST, $parsedPHPInput);
             }
         }
 
@@ -27,8 +29,10 @@ class Router
                 break;
             case "PUT":
             case "DELETE":
-                parse_str(file_get_contents("php://input"), $_PUT);
-                Tools::$data = array_merge(Tools::$data, $_PUT);
+                if ($PHPInput !== "" && $PHPInput !== false) {
+                    parse_str($PHPInput, $_PUT);
+                    Tools::$data = array_merge(Tools::$data, $_PUT);
+                }
                 break;
         }
     }
